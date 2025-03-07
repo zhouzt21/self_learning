@@ -1,0 +1,33 @@
+
+\section{Effect of Effective Horizon [8 pts]} 
+
+Consider an agent managing inventory for a store, which is represented as an MDP. The stock level $s$ refers to the number of items currently in stock (between 0 and 10, inclusive). At any time, the agent has two actions: sell (decrease stock by one, if possible) or buy (increase stock by one, if possible).  
+\begin{itemize}
+\item If $s 
+ > 0$ and the agent sells, it receives +1 reward for the sale and the stock level transitions to $s - 1$. If $s = 0$ nothing happens.
+ \item If $s < 9$ and the agent buys, it receives no reward and the stock level transitions to $s +  1$.
+ \item The owner of the store likes to see a fully stocked inventory at the end of the day, so the agent is rewarded with $+100$ if the stock level ever reaches the maximum level $s = 10$.
+ \item $s = 10$ is also a terminal state and the problem ends if it is reached.
+\end{itemize}
+
+The reward function, denoted as $r(s, a, s')$, can be summarized concisely as follows:
+\begin{itemize}
+    \item $r(s,\text{sell}, s-1) = 1$ for $s > 0$ and $r(0,\text{sell},0) = 0$
+    \item $r(s, \text{buy}, s+1) = 0$ for $s < 9$ and $r(9, \text{buy}, 10) = 100$. The last condition indicates that transitioning from $s = 9$ to $s = 10$ (fully stocked) yields $+100$ reward.
+\end{itemize}
+
+\noindent The stock level is assumed to always start at $s = 3$ at the beginning of the day. We will consider how the agent's optimal policy changes as we adjust the finite horizon $H$ of the problem. Recall that the horizon $H$ refers to a limit on the number of time steps the agent can interact with the MDP before the episode terminates, regardless of whether it has reached a terminal state. We will explore properties of the optimal policy (the policy that achieves highest episode reward) as the horizon $H$ changes.\\
+
+\noindent Consider, for example, $H = 4$. The agent can sell for three steps, transitioning from $s = 3$ to $s = 2$ to $s = 1$ to $s = 0$ receiving rewards $+1$, $+1$, and $+1$ for each sell action. At the fourth step, the inventory is empty so it can sell or buy, receiving no reward regardless. Then the problem terminates since time has expired.
+
+\begin{enumerate}[label=(\alph*)]
+    \item Starting from the initial state $s = 3$, it possible to a choose a value of $H$ that results in the optimal policy taking both buy and sell steps during its execution? Explain why or why not. [2 pts]
+
+    \item For what values of $H$ does the optimal policy reach a fully stocked inventory, starting from the initial state $s = 3$? I.e. Give a range for $H$. \textit{\textbf{Note 1:} we consider the inventory fully stocked if a buy action is chosen in state $s = 9$, causing a transition to $s = 10$. This includes the last time step in the horizon.} \textit{\textbf{Note 2:} By executing only buy actions, the agent can reach $s = 10$ from $s = 3$ in $H = 7$ steps.} [2 pts]
+
+    \item Now consider the infinite-horizon discounted setting. That is, there is no time limit -- the problem can only terminate when a terminal state is reached. Suppose $\gamma = 0$. What action does the optimal policy take when $s = 3$? What action does the optimal policy take when $s = 9$? [2 pts]
+
+    \item In the infinite-horizon discounted setting, is it possible to choose a fixed value of $\gamma \in [0, 1)$ such that the optimal policy starting from $s = 3$ never fully stocks the inventory? You do not need to propose a specific value, but simply explain your reasoning either way. [2 pts]
+\end{enumerate}
+
+

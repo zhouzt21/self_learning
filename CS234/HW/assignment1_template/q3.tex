@@ -1,0 +1,117 @@
+\section{Bellman Residuals and performance bounds [30 pts]}
+
+In this problem, we will study value functions and properties of the Bellman backup operator.
+\\
+
+\noindent \textbf{Definitions:} \noindent Recall that a value function is a $|S|$-dimensional vector where $|S|$ is the number of states of the MDP. When we use the term $V$ in these expressions as an ``arbitrary value function'', we mean that $V$ is an arbitrary $|S|$-dimensional vector which need not be aligned with the definition of the MDP at all. 
+On the other hand, $V^\pi$ is a value function that is achieved by some policy $\pi$ in the MDP.
+For example, say the MDP has 2 states and only negative immediate rewards. $V = [1,1]$ would be a valid choice for $V$ even though this value function can never be achieved by any policy $\pi$, but we can never have a $V^\pi = [1,1]$. This distinction between $V$ and $V^\pi$ is important for this question and more broadly in reinforcement learning.
+\\
+
+
+\noindent \textbf{Properties of Bellman Operators:} In the first part of this problem, we will explore some general and useful properties of the Bellman backup operator, which was introduced during lecture. We know that the Bellman backup operator $B$, defined below is a contraction with the fixed point as $V^*$, the optimal value function of the MDP. The symbols have their usual meanings. $\gamma$ is the discount factor and $0 \leq \gamma < 1$. In all parts, $\|v\| = \max_{s} | v(s) |$ is the infinity norm of the vector.
+
+\begin{equation}
+    (BV)(s) = \max_a r(s, a) + \gamma\sum_{s' \in S}p(s'|s,a)V(s')
+\end{equation}
+
+\noindent We also saw the contraction operator $B^\pi$ with the fixed point $V^\pi$, which is the Bellman backup operator for a particular policy given below:
+
+\begin{equation}
+    (B^\pi V)(s) = r(s,\pi(s)) + \gamma\sum_{s' \in S}p(s'|s,\pi(s))V(s')
+\end{equation}
+
+
+\noindent In this case, we'll assume $\pi$ is deterministic, but it doesn't have to be in general. In class, we showed that $|| BV - BV' || \leq \gamma ||V - V'||$ for two arbitrary value functions $V$ and $V'$. 
+
+\begin{enumerate}[label=(\alph*)]
+    \item Show that the analogous inequality, $|| B^\pi V - B^\pi V' || \leq \gamma ||V - V'||$, also holds. [3 pts].
+    
+    \item Prove that the fixed point for $B^\pi$ is unique. Recall that the fixed point is defined as $V$ satisfying $V = B^\pi V$. You may assume that a fixed point exists. \textit{Hint:} Consider proof by contradiction. [3 pts].
+    
+    \item Suppose that $V$ and $V'$ are vectors satisfying $V(s) \leq V'(s)$ for all $s$. Show that $B^\pi V(s) \leq B^\pi V'(s)$ for all $s$. Note that all of these inequalities are elementwise. [3 pts].
+
+
+\end{enumerate}
+
+
+
+
+\noindent \textbf{Bellman Residuals:} Having gained some intuition for value functions and the Bellman operators, we now turn to understanding how policies can be extracted and what their performance might look like. We can extract a greedy policy $\pi$ from an arbitrary value function $V$ using the equation below. 
+\begin{equation}
+    \pi(s) = \argmax_{a} [{r(s,a) + \gamma\sum_{s' \in S}p(s'|s,a)V(s')}]
+\end{equation}
+
+It is often helpful to know what the performance will be if we extract a greedy policy from an arbitrary value function. To see this, we introduce the notion of a Bellman residual.
+
+Define the Bellman residual to be $(BV - V)$ and the Bellman error magnitude to be $||BV - V||$.
+
+\begin{enumerate}
+    \item[(d)] For what value function $V$ does the Bellman error magnitude $\|BV - V \|$ equal 0? Why? [2 pts]
+    \item[(e)] Prove the following statements for an arbitrary value function $V$ and any policy $\pi$.  [5 pts]\\
+    \textit{Hint:} Try leveraging the triangle inequality by inserting a zero term.
+    \begin{equation}
+        ||V - V^\pi|| \leq \frac{||V - B^\pi V||}{1-\gamma}
+    \end{equation}
+    \begin{equation}
+        ||V - V^*|| \leq \frac{||V - BV||}{1-\gamma}
+    \end{equation}
+\end{enumerate}
+
+\noindent The result you proved in part (e) will be useful in proving a bound on the policy performance in the next few parts. Given the Bellman residual, we will now try to derive a bound on the policy performance, $V^\pi$.
+
+\begin{enumerate}
+    \item[(f)] Let $V$ be an arbitrary value function and $\pi$ be the greedy policy extracted from $V$. Let $\epsilon = ||BV-V||$ be the Bellman error magnitude for $V$. Prove the following for any state $s$. [5 pts]\\
+    \textit{Hint:} Try to use the results from part (e).
+    \begin{equation}
+        V^\pi(s) \geq V^*(s) - \frac{2\epsilon}{1-\gamma}
+    \end{equation}
+        \item[(g)] Give an example real-world application or domain where having a lower bound on $V^\pi(s)$ would be useful. [2 pt]
+
+    \item[(h)] Suppose we have another value function $V'$ and extract its greedy policy $\pi'$.  $\|B V' - V' \| = \epsilon = \|B V - V\|$. Does the above lower bound imply that $V^\pi(s) = V^{\pi'}(s)$ at any $s$? [2 pts]
+
+\end{enumerate}
+
+\noindent {A little bit more notation:} define $V \leq V'$ if $\forall s$, $V(s) \leq V'(s)$. 
+\\
+
+
+
+\noindent What if our algorithm returns a $V$ that satisfies $V^* \leq V$? I.e., it returns a value function that is better than the optimal value function of the MDP. Once again, remember that $V$ can be any vector, not necessarily achievable in the MDP but we would still like to bound the performance of $V^\pi$ where $\pi$ is extracted from said $V$. We will show that if this condition is met, then we can achieve an even tighter bound on policy performance.
+
+
+
+\begin{enumerate}
+    \item[(i)] Using the same notation and setup as part (e), if $V^* \leq V$, show the following holds for any state $s$. [5 pts]\\
+    \textit{Hint:} Recall that $\forall \pi$, $V^\pi \leq V^*$. (why?)
+    \begin{equation}
+        V^\pi(s) \geq V^*(s) - \frac{\epsilon}{1-\gamma}
+    \end{equation}
+\end{enumerate}
+
+\noindent \textbf{Intuition:} A useful way to interpret the results from parts (h) (and (i)) is based on the observation that a constant immediate reward of $r$ at every time-step leads to an overall discounted reward of $r + \gamma r + \gamma^2 r + \ldots = \frac{r}{1-\gamma}$. Thus, the above results say that a state value function $V$ with Bellman error magnitude $\epsilon$ yields a greedy policy whose reward per step (on average), differs from optimal by at most $2\epsilon$. So, if we develop an algorithm that reduces the Bellman residual, we're also able to bound the performance of the policy extracted from the value function outputted by that algorithm, which is very useful!
+\\
+
+\noindent \textbf{Challenges:} Try to prove the following if you're interested. \textbf{These parts will not be graded.}
+
+\begin{enumerate}
+    \item[(j)] It's not easy to show that the condition $V^* \leq V$ holds because we often don't know $V^*$ of the MDP. Show that if $BV \leq V$ then $V^* \leq V$. Note that this sufficient condition is much easier to check and does not require knowledge of $V^*$. \\
+    \textit{Hint}: Try to apply induction. What is $\lim\limits_{n \rightarrow \infty} B^n V$?
+
+\item[(k)] It is possible to make the bounds from parts (i) and (j) tighter. 
+Let $V$ be an arbitrary value function and $\pi$ be the greedy policy extracted from $V$. Let $\epsilon = ||BV-V||$ be the Bellman error magnitude for $V$. Prove the following for any state $s$:
+\begin{equation}
+        V^\pi(s) \geq V^*(s) - \frac{2\gamma\epsilon}{1-\gamma}
+\end{equation}
+Further, if $V^* \leq V$, prove for any state $s$
+\begin{equation}
+        V^\pi(s) \geq V^*(s) - \frac{\gamma\epsilon}{1-\gamma}
+\end{equation}
+\end{enumerate}
+
+
+
+
+
+
+\noindent 

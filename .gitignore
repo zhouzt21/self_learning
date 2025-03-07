@@ -1,0 +1,8 @@
+/ML2022-Spring/
+__pycache__/
+*.pyc
+*.pyo
+runs/
+*.gz
+raw
+*.zip
