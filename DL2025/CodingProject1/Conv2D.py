@@ -77,8 +77,49 @@ class Conv2D(module):
         ##############################################################################
         #                  TODO: You need to complete the code here                  #
         ##############################################################################
-        # YOUR CODE HERE
-        raise NotImplementedError()
+        # raise NotImplementedError()
+
+        # using _inputs_preprocess to get padded X, size of (batch, in_c, padded_h, padded_w)
+        X = np.pad(self.input, self.padding, mode="constant")
+        bsz, _, h, w = X.shape
+        in_c, k_h, k_w, out_c = self.kernel_shape
+        s_h, s_w = self.stride
+        _, _, out_h, out_w = grad.shape
+
+        # initialize the grads of weight and bias
+        self.grads = {}
+        self.grads['weight'] = np.zeros_like(self.params['weight'])
+        self.grads['bias'] = np.zeros_like(self.params['bias'])
+
+        # grad of bias：sum up 
+        self.grads['bias'] = grad.sum(axis=(0, 2, 3))
+
+        # initialize the grad of input X
+        dX = np.zeros_like(X)
+
+        for in_c_i in range(in_c): # cin: i
+            for out_c_i in range(out_c):  # cout: j 
+                for r in range(out_h):
+                    r_start = r * s_h
+                    for c in range(out_w):
+                        c_start = c * s_w
+                        # current patch (X_i), kernel size of (bsz, 1, k_h, k_w)
+                        patch = X[:, in_c_i, r_start: r_start+k_h, c_start: c_start+k_w]
+                        # current output position grad (dL/dY_j) , size of (bsz,)
+                        grad_curr = grad[:, out_c_i, r, c]
+                        # update grad of weight , dL/dW_ij = X_i * dL/dY_j;    grad(W_ij) += dL/dW_ij
+                        #       notice: grad_curr need to be broadcast to the same size of patch, then sum up on batch dim, since  grad(W_ij) don't have batch dim
+                        self.grads['weight'][in_c_i, :, :, out_c_i] += (patch * grad_curr[:, None, None]).sum(axis=0)
+                        # update input X,  dL/dX_i = W_ij * dL/dY_j;   grad(X_i) += dL/dX_i 
+                        #       notice: keep the batch size dim, don't sum up since X_i has batch dim
+                        dX[:, in_c_i, r_start: r_start+k_h, c_start: c_start+k_w] += self.params['weight'][in_c_i, :, :, out_c_i] * grad_curr[:, None, None]
+
+        # unpadding
+        pad_top, pad_bottom = self.padding[2]
+        pad_left, pad_right = self.padding[3]
+        d_input = dX[:, :, pad_top: dX.shape[2]-pad_bottom, pad_left: dX.shape[3]-pad_right]
+        return d_input
+
         ##############################################################################
         #                              END OF YOUR CODE                              #
         ##############################################################################

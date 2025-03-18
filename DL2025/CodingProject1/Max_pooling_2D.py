@@ -44,8 +44,10 @@ class MaxPool2D(module):
             for c in range(out_w):
                 c_start = c * s_w
                 pool = X[:, :, r_start: r_start+k_h, c_start: c_start+k_w]
+                #  (batch_sz, in_c, k_h, k_w) -> (batch_sz, in_c, k_h*k_w)
                 pool = pool.reshape((batch_sz, in_c, -1))
 
+                # (batch_sz, in_c) -> (batch_sz, in_c, 1) index of max elements
                 _argmax = np.argmax(pool, axis=2)[:, :, np.newaxis]
                 argmax[:, :, r, c] = _argmax.squeeze(axis=2)
 
@@ -63,8 +65,35 @@ class MaxPool2D(module):
         ##############################################################################
         #                  TODO: You need to complete the code here                  #
         ##############################################################################
-        # YOUR CODE HERE
-        raise NotImplementedError()
+        dX = np.zeros(self.X_shape)
+        s_h, s_w = self.stride
+        k_h, k_w = self.kernel_shape
+        out_h, out_w = self.out_shape
+
+        for r in range(out_h):
+            r_start = r * s_h
+            for c in range(out_w):
+                c_start = c * s_w
+                # get the argmax of this window, size of (batch_size, in_c)
+                window_argmax = self.argmax[:, :, r, c]
+                # shape (batch_size, in_c)
+                grad_curr = grad[:, :, r, c]
+                # trans to 2D index
+                row_offset = window_argmax // k_w
+                col_offset = window_argmax % k_w
+
+                for i in range(dX.shape[0]):      # batch size
+                    for j in range(dX.shape[1]):  # channel
+                        pos_r = r_start + row_offset[i, j]
+                        pos_c = c_start + col_offset[i, j]
+                        dX[i, j, pos_r, pos_c] += grad_curr[i, j]
+
+        # unpadding
+        pad_top, pad_bottom = self.padding[2]
+        pad_left, pad_right = self.padding[3]
+        d_input = dX[:, :, pad_top: dX.shape[2]-pad_bottom, pad_left: dX.shape[3]-pad_right]
+        return d_input
+
         ##############################################################################
         #                              END OF YOUR CODE                              #
         ##############################################################################

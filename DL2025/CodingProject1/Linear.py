@@ -43,8 +43,10 @@ class Linear(module):
         ##############################################################################
         #                  TODO: You need to complete the code here                  #
         ##############################################################################
-        # YOUR CODE HERE
-        raise NotImplementedError()
+        self.grads['bias'] = grad.sum(axis=0)
+        self.grads['weight'] = self.input.T @ grad
+        
+        return grad @ self.params['weight'].T
         ##############################################################################
         #                              END OF YOUR CODE                              #
         ##############################################################################
