@@ -1,4 +1,0 @@
-*.py linguist-language=Python linguist-generated=false
-*.ipynb linguist-documentation=false  linguist-generated=false
-*.yaml linguist-language=Yaml
-*.sh linguist-language=Shell
