@@ -6,3 +6,4 @@ runs/
 *.gz
 raw
 *.zip
+*.ipynb linguist-detectable
